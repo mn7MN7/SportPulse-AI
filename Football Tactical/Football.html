@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SportPulse AI Analytics | Enterprise 3D Football Neural SOC v2.5</title>
+    <!-- Tailwind CSS v3 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Pro Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;900&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #010403;
+            color: #f3f4f6;
+            overflow-x: hidden;
+            margin: 0;
+            perspective: 1400px;
+        }
+
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* 3D Stadium Ambient Cyber Lighting */
+        .stadium-glow {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none; z-index: 0;
+            background: 
+                radial-gradient(circle at 10% 10%, rgba(0, 255, 135, 0.09) 0%, transparent 45%),
+                radial-gradient(circle at 90% 90%, rgba(14, 165, 233, 0.08) 0%, transparent 45%),
+                radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.04) 0%, transparent 60%),
+                linear-gradient(135deg, #010403 0%, #000201 100%);
+        }
+
+        /* Advanced 3D Glassmorphism Cards */
+        .card-3d {
+            background: linear-gradient(145deg, rgba(4, 25, 17, 0.92), rgba(1, 10, 6, 0.97));
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(0, 255, 135, 0.22);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.95), 
+                        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+            transform-style: preserve-3d;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .card-3d:hover {
+            transform: translateY(-5px) rotateX(1.5deg) rotateY(-1.5deg);
+            border-color: rgba(0, 255, 135, 0.5);
+            box-shadow: 0 35px 70px -15px rgba(0, 255, 135, 0.18),
+                        0 0 30px rgba(0, 255, 135, 0.12);
+        }
+
+        /* 3D Immersive Football Pitch */
+        .pitch-3d {
+            background: linear-gradient(180deg, #074d2c 0%, #032b18 100%);
+            border: 3px solid rgba(255, 255, 255, 0.45);
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 70px rgba(0,0,0,0.8), 0 25px 50px rgba(0,0,0,0.9);
+            transform: rotateX(12deg);
+            transform-style: preserve-3d;
+        }
+
+        /* Pitch Markings */
+        .center-circle {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 110px; height: 110px;
+            border: 2px solid rgba(255, 255, 255, 0.55);
+            border-radius: 50%;
+        }
+        .center-line {
+            position: absolute; top: 0; bottom: 0; left: 50%;
+            width: 2px; background: rgba(255, 255, 255, 0.55);
+            transform: translateX(-50%);
+        }
+        .penalty-box-left {
+            position: absolute; top: 50%; left: 0;
+            transform: translateY(-50%);
+            width: 80px; height: 180px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-left: none;
+        }
+        .penalty-box-right {
+            position: absolute; top: 50%; right: 0;
+            transform: translateY(-50%);
+            width: 80px; height: 180px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-right: none;
+        }
+
+        /* YOLO Bounding Box & Tracking Elements */
+        .yolo-box {
+            position: absolute;
+            border: 2px solid #00ff87;
+            background: rgba(0, 255, 135, 0.12);
+            box-shadow: 0 0 12px rgba(0, 255, 135, 0.5);
+            animation: boxGlow 2s infinite alternate;
+        }
+        .yolo-label {
+            position: absolute; top: -20px; left: -2px;
+            background: #00ff87; color: #000;
+            font-size: 9px; font-weight: 900;
+            padding: 1px 5px; border-radius: 3px;
+            font-family: 'Fira Code', monospace;
+        }
+
+        @keyframes boxGlow {
+            0% { border-color: #00ff87; box-shadow: 0 0 5px rgba(0, 255, 135, 0.3); }
+            100% { border-color: #38bdf8; box-shadow: 0 0 18px rgba(56, 189, 248, 0.8); }
+        }
+
+        /* Glowing Animated Ball */
+        @keyframes ballTrajectory {
+            0% { top: 35%; left: 25%; }
+            33% { top: 65%; left: 60%; }
+            66% { top: 25% ; left: 75%; }
+            100% { top: 35%; left: 25%; }
+        }
+        .live-ball {
+            position: absolute; width: 15px; height: 15px;
+            background: #ffffff; border-radius: 50%;
+            box-shadow: 0 0 20px #ffffff, 0 0 30px #00ff87;
+            animation: ballTrajectory 7s infinite ease-in-out;
+            z-index: 10;
+        }
+
+        /* Radar Sweep Effect */
+        .radar-sweep {
+            position: absolute; top: 50%; left: 50%;
+            width: 150px; height: 150px; border-radius: 50%;
+            border: 1px dashed rgba(0, 255, 135, 0.3);
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #010403; }
+        ::-webkit-scrollbar-thumb { background: rgba(0, 255, 135, 0.35); border-radius: 3px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col md:flex-row selection:bg-emerald-400 selection:text-black relative">
+
+    <div class="stadium-glow"></div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center space-y-2 pointer-events-none w-full max-w-md px-4"></div>
+
+    <!-- SIDEBAR 3D NAVIGATION -->
+    <aside class="w-full md:w-80 card-3d border-r border-emerald-500/20 flex flex-col justify-between p-6 z-30 shrink-0">
+        <div>
+            <!-- Brand Logo & Header -->
+            <div class="flex items-center space-x-3 space-x-reverse mb-8">
+                <div class="w-13 h-13 rounded-2xl bg-gradient-to-tr from-emerald-500 via-teal-400 to-cyan-400 flex items-center justify-center text-black shadow-2xl shadow-emerald-950 font-black text-xl">
+                    <i class="fa-solid fa-futbol animate-spin" style="animation-duration: 14s;"></i>
+                </div>
+                <div>
+                    <h1 class="text-sm font-black tracking-wide text-white">SportPulse <span class="text-emerald-400">AI</span></h1>
+                    <p class="text-[10px] text-emerald-300/70 code-font tracking-widest">TACTICAL NEURAL SOC</p>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="space-y-2 text-xs font-semibold">
+                <a href="#" onclick="switchTab('soc')" id="nav-soc" class="flex items-center space-x-3 space-x-reverse px-4 py-3 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg shadow-emerald-950 transition">
+                    <i class="fa-solid fa-satellite-dish w-5 text-sm text-emerald-400"></i>
+                    <span>غرفة العمليات الحية (Match SOC)</span>
+                </a>
+                <a href="#" onclick="switchTab('players')" id="nav-players" class="flex items-center space-x-3 space-x-reverse px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition">
+                    <i class="fa-solid fa-users-gear w-5 text-sm text-teal-400"></i>
+                    <span>تحليل اللاعبين والـ IDs (YOLOv8)</span>
+                </a>
+                <a href="#" onclick="switchTab('tactics')" id="nav-tactics" class="flex items-center space-x-3 space-x-reverse px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition">
+                    <i class="fa-solid fa-chess-board w-5 text-sm text-orange-400"></i>
+                    <span>مخططات التمركز والخطط (4-3-3)</span>
+                </a>
+                <a href="#" onclick="switchTab('telemetry')" id="nav-telemetry" class="flex items-center space-x-3 space-x-reverse px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition">
+                    <i class="fa-solid fa-chart-line w-5 text-sm text-blue-400"></i>
+                    <span>سجلات التتبع والذكاء الاصطناعي</span>
+                </a>
+                <a href="#" onclick="switchTab('settings')" id="nav-settings" class="flex items-center space-x-3 space-x-reverse px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition">
+                    <i class="fa-solid fa-sliders w-5 text-sm text-purple-400"></i>
+                    <span>إعدادات نموذج `best.pt` والـ API</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- Developer Credit Card -->
+        <div class="pt-6 border-t border-emerald-500/20 space-y-3">
+            <div class="card-3d p-3.5 rounded-2xl flex items-center justify-between text-xs">
+                <div class="flex items-center space-x-2 space-x-reverse">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span class="text-gray-300 font-medium">موديل `best.pt` متصل</span>
+                </div>
+                <span class="text-[10px] code-font text-emerald-400 bg-emerald-950/90 px-2 py-0.5 rounded border border-emerald-500/30">GPU RTX</span>
+            </div>
+            <div class="text-[11px] text-emerald-300 code-font text-center font-bold bg-emerald-950/80 py-2.5 px-3 rounded-xl border border-emerald-500/40 shadow-inner">
+                👨‍💻 Lead Architect: Mazin Hijran Ibrahim
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN DASHBOARD CONTENT -->
+    <main class="flex-grow flex flex-col min-w-0 p-4 md:p-8 space-y-6 z-10">
+        
+        <!-- Top Navigation Bar -->
+        <header class="card-3d p-4 md:p-5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-3 space-x-reverse">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/40">
+                    <i class="fa-solid fa-shield-halved text-sm"></i>
+                </div>
+                <div>
+                    <h2 class="text-sm md:text-base font-black text-white">منصة التحليلات الكروية بالرؤية الحاسوبية (3D Football Intelligence)</h2>
+                    <p class="text-[11px] text-gray-400">إشراف وتطوير المنهجية: <strong class="text-emerald-400">Mazin Hijran Ibrahim</strong> | نظام تكتيكي ذكي لمعالجة فيديوهات الملاعب.</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3 space-x-reverse">
+                <button onclick="exportTacticalReport()" class="px-4 py-2 rounded-xl bg-white/5 hover:bg-emerald-500/20 text-xs font-semibold text-gray-200 border border-emerald-500/30 transition cursor-pointer code-font flex items-center space-x-2 space-x-reverse">
+                    <i class="fa-solid fa-download text-emerald-400"></i>
+                    <span>تصدير التقرير الفني الشامل</span>
+                </button>
+                <div id="systemBadge" class="code-font text-xs bg-emerald-950/90 text-emerald-300 px-3.5 py-2 rounded-xl border border-emerald-500/40 shadow-inner">
+                    🟢 النظام جاهز للرصد الحي
+                </div>
+            </div>
+        </header>
+
+        <!-- TAB CONTENT CONTAINER -->
+        <div id="tab-content" class="space-y-6">
+
+            <!-- TAB 1: MATCH SOC (DEFAULT) -->
+            <div id="content-soc" class="space-y-6">
+                <!-- Metrics Grid -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="card-3d p-5 rounded-2xl space-y-1">
+                        <span class="text-[11px] text-gray-400 font-medium">الاستحواذ الميداني (Possession)</span>
+                        <div class="text-2xl font-black text-white flex items-baseline justify-between">
+                            <span id="statPossession">58% - 42%</span>
+                            <i class="fa-solid fa-chart-pie text-emerald-400 text-base"></i>
+                        </div>
+                        <div class="w-full bg-black/50 h-1.5 rounded-full mt-2 overflow-hidden flex border border-emerald-500/20">
+                            <div class="bg-emerald-500 h-full" style="width: 58%"></div>
+                            <div class="bg-blue-500 h-full" style="width: 42%"></div>
+                        </div>
+                    </div>
+
+                    <div class="card-3d p-5 rounded-2xl space-y-1">
+                        <span class="text-[11px] text-gray-400 font-medium">أقصى سرعة للاعب (Top Speed)</span>
+                        <div class="text-2xl font-black text-white flex items-baseline justify-between">
+                            <span id="statSpeed">34.1 كم/س</span>
+                            <i class="fa-solid fa-gauge-high text-teal-400 text-base"></i>
+                        </div>
+                        <p class="text-[10px] text-emerald-400/80 mt-2">مرصودة عبر نموذج YOLOv8</p>
+                    </div>
+
+                    <div class="card-3d p-5 rounded-2xl space-y-1">
+                        <span class="text-[11px] text-gray-400 font-medium">دقة التمريرات (Pass Accuracy)</span>
+                        <div class="text-2xl font-black text-white flex items-baseline justify-between">
+                            <span id="statPassAcc" class="text-emerald-400">92.8%</span>
+                            <i class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+                        </div>
+                        <p class="text-[10px] text-gray-400 mt-2">بناءً على 480 تمريرة ناجحة</p>
+                    </div>
+
+                    <div class="card-3d p-5 rounded-2xl space-y-1">
+                        <span class="text-[11px] text-gray-400 font-medium">المسافة الإجمالية (Distance)</span>
+                        <div class="text-2xl font-black text-white flex items-baseline justify-between">
+                            <span>121.4 كم</span>
+                            <i class="fa-solid fa-person-running text-blue-400 text-base"></i>
+                        </div>
+                        <p class="text-[10px] text-gray-400 mt-2">إجمالي حركة الفريقين بالملعب</p>
+                    </div>
+                </div>
+
+                <!-- Vision Neural Pipeline Grid -->
+                <div class="card-3d p-6 rounded-2xl space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xs font-bold text-gray-200 flex items-center space-x-2 space-x-reverse code-font">
+                            <i class="fa-solid fa-microchip text-emerald-400 ml-1.5"></i>
+                            <span>[VISION_PIPELINE]: معالجة الرؤية الحاسوبية وتتبع اللاعبين عبر `best.pt`</span>
+                        </h3>
+                        <span class="text-[10px] text-emerald-400 code-font">YOLOv8x + ByteTrack Engine</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div id="node1" class="card-3d p-4 rounded-xl border border-emerald-500/20 space-y-2">
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="text-emerald-400 code-font font-bold">[STAGE 01]</span>
+                                <i class="fa-solid fa-video text-emerald-400"></i>
+                            </div>
+                            <h4 class="text-xs font-bold text-white">تفكيك الإطارات (60 FPS)</h4>
+                            <p class="text-[11px] text-gray-400" id="desc1">جاهز للمعالجة الفورية...</p>
+                        </div>
+
+                        <div id="node2" class="card-3d p-4 rounded-xl border border-emerald-500/20 space-y-2">
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="text-teal-400 code-font font-bold">[STAGE 02]</span>
+                                <i class="fa-solid fa-crosshairs text-teal-400"></i>
+                            </div>
+                            <h4 class="text-xs font-bold text-white">كشف وتتبع اللاعبين (YOLO)</h4>
+                            <p class="text-[11px] text-gray-400" id="desc2">بانتظار تفعيل الموديل...</p>
+                        </div>
+
+                        <div id="node3" class="card-3d p-4 rounded-xl border border-emerald-500/20 space-y-2">
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="text-blue-400 code-font font-bold">[STAGE 03]</span>
+                                <i class="fa-solid fa-map-location-dot text-blue-400"></i>
+                            </div>
+                            <h4 class="text-xs font-bold text-white">رسم الخريطة الحرارية</h4>
+                            <p class="text-[11px] text-gray-400" id="desc3">بانتظار الإحداثيات...</p>
+                        </div>
+
+                        <div id="node4" class="card-3d p-4 rounded-xl border border-emerald-500/20 space-y-2">
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="text-indigo-400 code-font font-bold">[STAGE 04]</span>
+                                <i class="fa-solid fa-file-lines text-indigo-400"></i>
+                            </div>
+                            <h4 class="text-xs font-bold text-white">إصدار التقرير الفني النهائي</h4>
+                            <p class="text-[11px] text-gray-400" id="desc4">بانتظار النتائج...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3D Pitch Simulation & Telemetry Logs -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    
+                    <!-- 3D Stadium Pitch Simulation -->
+                    <div class="card-3d rounded-3xl p-6 space-y-4 flex flex-col justify-between">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2 space-x-reverse">
+                                <span class="w-3 h-3 rounded-full bg-emerald-500 animate-ping"></span>
+                                <span class="text-xs font-bold text-gray-200 code-font">محاكي ملعب كرة القدم (3D Tactical Pitch)</span>
+                            </div>
+                            <span class="text-[10px] text-emerald-400 code-font">LIVE YOLO BOUNDING</span>
+                        </div>
+
+                        <div class="pitch-3d w-full h-80 rounded-2xl relative flex items-center justify-center shadow-2xl my-2">
+                            <div class="center-line"></div>
+                            <div class="center-circle"></div>
+                            <div class="penalty-box-left"></div>
+                            <div class="penalty-box-right"></div>
+                            <div class="radar-sweep"></div>
+                            
+                            <!-- Live Ball -->
+                            <div class="live-ball"></div>
+
+                            <!-- YOLO Bounding Boxes Simulation -->
+                            <div class="yolo-box" style="top: 25%; right: 30%; width: 35px; height: 50px; border-radius: 4px;">
+                                <span class="yolo-label">ID #7 (0.96)</span>
+                            </div>
+                            <div class="yolo-box" style="bottom: 30%; left: 35%; width: 35px; height: 50px; border-radius: 4px; border-color: #38bdf8;">
+                                <span class="yolo-label" style="background: #38bdf8;">ID #10 (0.94)</span>
+                            </div>
+                            <div class="yolo-box" style="top: 60%; right: 65%; width: 30px; height: 45px; border-radius: 4px; border-color: #f43f5e;">
+                                <span class="yolo-label" style="background: #f43f5e;">GK #1 (0.98)</span>
+                            </div>
+
+                            <div class="absolute bottom-3 right-3 bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-xl text-[10px] text-gray-200 code-font border border-emerald-500/30">
+                                🔴 الفريق الأول | 🔵 الفريق الثاني | ⚽ كرة القدم الحية
+                            </div>
+                        </div>
+
+                        <button onclick="runTacticalAnalysis()" id="analyzeBtn" class="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-500 font-black text-xs text-black shadow-2xl shadow-emerald-950 hover:scale-[1.01] active:scale-95 transition-all cursor-pointer code-font flex items-center justify-center space-x-2 space-x-reverse">
+                            <i class="fa-solid fa-play text-[10px]"></i>
+                            <span>تشغيل نموذج الذكاء الاصطناعي (best.pt) وتحليل المباراة</span>
+                        </button>
+                    </div>
+
+                    <!-- Telemetry Logs & Analysis Output -->
+                    <div class="card-3d rounded-3xl p-6 space-y-4 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs font-bold text-gray-200 code-font">[VISION_TELEMETRY]: سجلات الـ AI والـ Bounding Boxes</span>
+                                <span class="text-[10px] text-emerald-400 code-font animate-pulse">● MODEL ACTIVE</span>
+                            </div>
+                            <div id="terminalLogs" class="bg-[#010604] p-4 rounded-2xl border border-emerald-500/30 code-font text-[11px] text-gray-400 h-68 overflow-y-auto space-y-1.5 shadow-inner">
+                                <p class="text-emerald-400/80">[SYSTEM] تم ربط ملف best.pt بنجاح بالسيرفر والواجهة. بانتظار بدء التحليل...</p>
+                            </div>
+                        </div>
+
+                        <div class="text-xs code-font bg-[#010604] px-4 py-3 rounded-2xl border border-emerald-500/30 flex items-center justify-between shadow-inner">
+                            <span>حالة المعالجة: <strong id="processStatus" class="text-gray-400">جاهز للتشغيل</strong></span>
+                            <span>كفاءة الموديل: <strong id="modelAccuracy" class="text-emerald-400">98.4% (best.pt)</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: PLAYERS TRACKING (HIDDEN BY DEFAULT) -->
+            <div id="content-players" class="space-y-6 hidden">
+                <div class="card-3d p-6 rounded-3xl space-y-4">
+                    <h3 class="text-sm font-bold text-white flex items-center space-x-2 space-x-reverse">
+                        <i class="fa-solid fa-users-gear text-teal-400"></i>
+                        <span>قائمة اللاعبين المرصودين ومعرّفات التتبع (YOLOv8 IDs)</span>
+                    </h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-right text-xs code-font border-collapse">
+                            <thead>
+                                <tr class="border-b border-emerald-500/20 text-emerald-400">
+                                    <th class="p-3">رقم الـ ID</th>
+                                    <th class="p-3">الفريق</th>
+                                    <th class="p-3">السرعة الحالية</th>
+                                    <th class="p-3">المسافة المقطوعة</th>
+                                    <th class="p-3">دقة التمركز</th>
+                                    <th class="p-3">الحالة البصرية</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-gray-300 divide-y divide-emerald-500/10">
+                                <tr><td class="p-3 text-emerald-300 font-bold">#ID_07</td><td class="p-3">المستضيف 🔴</td><td class="p-3">32.4 كم/س</td><td class="p-3">11.2 كم</td><td class="p-3">96.8%</td><td class="p-3 text-emerald-400">نشط (Tracking)</td></tr>
+                                <tr><td class="p-3 text-emerald-300 font-bold">#ID_10</td><td class="p-3">الضيف 🔵</td><td class="p-3">34.1 كم/س</td><td class="p-3">12.5 كم</td><td class="p-3">98.1%</td><td class="p-3 text-emerald-400">نشط (Tracking)</td></tr>
+                                <tr><td class="p-3 text-emerald-300 font-bold">#ID_04</td><td class="p-3">المستضيف 🔴</td><td class="p-3">28.9 كم/س</td><td class="p-3">10.1 كم</td><td class="p-3">94.2%</td><td class="p-3 text-emerald-400">نشط (Tracking)</td></tr>
+                                <tr><td class="p-3 text-emerald-300 font-bold">#ID_09</td><td class="p-3">الضيف 🔵</td><td class="p-3">31.0 كم/س</td><td class="p-3">11.8 كم</td><td class="p-3">95.5%</td><td class="p-3 text-emerald-400">نشط (Tracking)</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: TACTICAL FORMATIONS (HIDDEN BY DEFAULT) -->
+            <div id="content-tactics" class="space-y-6 hidden">
+                <div class="card-3d p-6 rounded-3xl space-y-4">
+                    <h3 class="text-sm font-bold text-white flex items-center space-x-2 space-x-reverse">
+                        <i class="fa-solid fa-chess-board text-orange-400"></i>
+                        <span>محاكاة خطط اللعب والتمركز التكتيكي (Formation: 4-3-3)</span>
+                    </h3>
+                    <p class="text-xs text-gray-400">يقوم نموذج الذكاء الاصطناعي بتحليل المسافات الفاصلة بين الخطوط الثلاثة (الدفاع، الوسط، الهجوم) وتنبيه المدرب في حال وجود ثغرات.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
+                        <div class="card-3d p-4 rounded-2xl border border-orange-500/20 space-y-2">
+                            <span class="text-xs text-orange-400 font-bold">[خط الدفاع]</span>
+                            <h4 class="text-sm font-bold text-white">التمركز والخط المتقدم</h4>
+                            <p class="text-xs text-gray-400">متوسط الارتفاع: 42 متراً. نسبة تفعيل التسلل: 88%.</p>
+                        </div>
+                        <div class="card-3d p-4 rounded-2xl border border-teal-500/20 space-y-2">
+                            <span class="text-xs text-teal-400 font-bold">[خط الوسط]</span>
+                            <h4 class="text-sm font-bold text-white">الاستحواذ والضغط العالي</h4>
+                            <p class="text-xs text-gray-400">نسبة استرجاع الكرات في الثلث الهجومي: 64%.</p>
+                        </div>
+                        <div class="card-3d p-4 rounded-2xl border border-emerald-500/20 space-y-2">
+                            <span class="text-xs text-emerald-400 font-bold">[خط الهجوم]</span>
+                            <h4 class="text-sm font-bold text-white">التحولات السريعة (Counter Attacks)</h4>
+                            <p class="text-xs text-gray-400">متوسط سرعة الارتداد الهجومي: 3.4 ثوانٍ.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: TELEMETRY & LOGS (HIDDEN BY DEFAULT) -->
+            <div id="content-telemetry" class="space-y-6 hidden">
+                <div class="card-3d p-6 rounded-3xl space-y-4">
+                    <h3 class="text-sm font-bold text-white flex items-center space-x-2 space-x-reverse">
+                        <i class="fa-solid fa-chart-line text-blue-400"></i>
+                        <span>سجلات البيانات الرياضية والتحليل العميق (Deep Telemetry Logs)</span>
+                    </h3>
+                    <div class="bg-[#010604] p-4 rounded-2xl border border-blue-500/20 code-font text-xs text-gray-300 space-y-2">
+                        <p class="text-blue-400">[LOG_01] تم تحميل أوزان best.pt بنجاح في ذاكرة الـ VRAM لكرت الشاشة.</p>
+                        <p class="text-emerald-400">[LOG_02] بدء معالجة دفق الفيديو بدقة 1080p بمعدل 60 إطاراً في الثانية.</p>
+                        <p class="text-teal-400">[LOG_03] نجاح خوارزمية ByteTrack في ربط مسارات اللاعبين بدون فقدان أي ID.</p>
+                        <p class="text-orange-400">[LOG_04] تم تصدير الإحصائيات التكتيكية بنجاح إلى ملف التخزين المؤقت.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 5: SETTINGS (HIDDEN BY DEFAULT) -->
+            <div id="content-settings" class="space-y-6 hidden">
+                <div class="card-3d p-6 rounded-3xl space-y-4">
+                    <h3 class="text-sm font-bold text-white flex items-center space-x-2 space-x-reverse">
+                        <i class="fa-solid fa-sliders text-purple-400"></i>
+                        <span>إعدادات الاتصال بنموذج الذكاء الاصطناعي (`best.pt`)</span>
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                        <div class="space-y-2">
+                            <label class="text-gray-400">مسار الموديل النشط (Model Path)</label>
+                            <input type="text" value="models/best.pt" disabled class="w-full bg-black/60 border border-emerald-500/30 p-3 rounded-xl code-font text-emerald-400">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-gray-400">معامل عتبة الثقة (Confidence Threshold)</label>
+                            <input type="text" value="0.75 (Optimized for Sports)" disabled class="w-full bg-black/60 border border-emerald-500/30 p-3 rounded-xl code-font text-teal-400">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <footer class="w-full py-4 text-center text-xs text-gray-400 border-t border-emerald-500/20 code-font z-10 flex flex-col sm:flex-row items-center justify-between px-2">
+            <span>SportPulse AI Analytics &copy; 2026 | Enterprise Neural Sports Tech</span>
+            <span class="text-emerald-400 font-bold mt-1 sm:mt-0">Lead Architect: Mazin Hijran Ibrahim</span>
+        </footer>
+
+    </main>
+
+    <!-- JavaScript Engine & Tab Manager -->
+    <script>
+        function showNotification(message) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `pointer-events-auto flex items-center space-x-3 space-x-reverse px-5 py-3.5 rounded-2xl border border-emerald-500/40 text-emerald-200 bg-[#041a12]/95 shadow-2xl text-xs code-font backdrop-blur-xl`;
+            toast.innerHTML = `
+                <div class="w-8 h-8 rounded-xl bg-emerald-500/20 flex items-center justify-center shrink-0 border border-emerald-500/30">
+                    <i class="fa-solid fa-futbol text-xs text-emerald-400"></i>
+                </div>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-15px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3800);
+        }
+
+        function switchTab(tabId) {
+            ['soc', 'players', 'tactics', 'telemetry', 'settings'].forEach(id => {
+                document.getElementById(`content-${id}`).classList.add('hidden');
+                const navBtn = document.getElementById(`nav-${id}`);
+                if (navBtn) {
+                    navBtn.className = "flex items-center space-x-3 space-x-reverse px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition";
+                }
+            });
+
+            document.getElementById(`content-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if (activeBtn) {
+                activeBtn.className = "flex items-center space-x-3 space-x-reverse px-4 py-3 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg shadow-emerald-950 transition";
+            }
+        }
+
+        function appendLog(stage, msg) {
+            const logs = document.getElementById('terminalLogs');
+            if (!logs) return;
+            const p = document.createElement('p');
+            p.innerHTML = `<span class="text-emerald-400">[${new Date().toLocaleTimeString()}]</span> <strong class="text-teal-400">[${stage}]:</strong> ${msg}`;
+            logs.appendChild(p);
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        async function runTacticalAnalysis() {
+            const btn = document.getElementById('analyzeBtn');
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            const logsElem = document.getElementById('terminalLogs');
+            if (logsElem) logsElem.innerHTML = "";
+            document.getElementById('systemBadge').innerText = "🔄 جاري تحليل الفيديو عبر نموذج best.pt...";
+
+            ['node1', 'node2', 'node3', 'node4'].forEach(id => {
+                const node = document.getElementById(id);
+                if (node) node.classList.remove('active-node');
+            });
+
+            // Stage 1
+            document.getElementById('node1').classList.add('active-node');
+            document.getElementById('desc1').innerText = "تفكيك البث إلى إطارات بدقة عالية...";
+            appendLog("Frame_Extractor", "تم استخراج 2,800 إطار فيديو للملعب بنجاح.");
+            await new Promise(r => setTimeout(r, 900));
+            document.getElementById('desc1').innerText = "اكتمل استخراج الإطارات ✅";
+
+            // Stage 2
+            document.getElementById('node1').classList.remove('active-node');
+            document.getElementById('node2').classList.add('active-node');
+            document.getElementById('desc2').innerText = "تشغيل نموذج best.pt للرصد والتتبع...";
+            appendLog("YOLOv8_Engine", "تم تطبيق Bounding Boxes وكشف 22 لاعباً والكرة بنجاح تام 🎯");
+            await new Promise(r => setTimeout(r, 1200));
+            document.getElementById('desc2').innerText = "تم تتبع اللاعبين والكرة ✅";
+
+            // Stage 3
+            document.getElementById('node2').classList.remove('active-node');
+            document.getElementById('node3').classList.add('active-node');
+            document.getElementById('desc3').innerText = "حساب الإحداثيات وتوليد الخريطة الحرارية...";
+            appendLog("Heatmap_Engine", "تم تحليل نقاط الضغط الهجومي ومناطق الاستحواذ بدقة 🔥");
+            await new Promise(r => setTimeout(r, 1100));
+            document.getElementById('desc3').innerText = "اكتملت الخريطة الحرارية ✅";
+
+            // Stage 4
+            document.getElementById('node3').classList.remove('active-node');
+            document.getElementById('node4').classList.add('active-node');
+            document.getElementById('desc4').innerText = "تجميع البيانات وإصدار التقرير الفني...";
+            appendLog("Supervisor_Agent", "تم توثيق تقرير الأداء التكتيكي للمباراة (By Mazin Hijran Ibrahim) 🛡️");
+            await new Promise(r => setTimeout(r, 700));
+            document.getElementById('desc4').innerText = "جاهز للعرض التكتيكي ✅";
+
+            document.getElementById('node4').classList.remove('active-node');
+            document.getElementById('systemBadge').innerText = "🟢 اكتمل تحليل المباراة بنجاح تام";
+
+            document.getElementById('processStatus').innerText = "مكتمل 100%";
+            document.getElementById('processStatus').className = "text-emerald-400 font-bold";
+            document.getElementById('modelAccuracy').innerText = "98.4% (best.pt)";
+            document.getElementById('modelAccuracy').className = "text-emerald-400 font-bold";
+
+            btn.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            showNotification("⚽ نجح نموذج best.pt في تحليل المباراة وتوليد إحصائيات 3D Bounding Boxes!");
+        }
+
+        function exportTacticalReport() {
+            const report = {
+                platform: "SportPulse AI Analytics 3D",
+                architect: "Mazin Hijran Ibrahim",
+                model: "best.pt (YOLOv8)",
+                possession: "58% - 42%",
+                topSpeed: "34.1 km/h",
+                passAccuracy: "92.8%",
+                status: "Analyzed Successfully"
+            };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(report, null, 4));
+            const dl = document.createElement('a');
+            dl.setAttribute("href", dataStr);
+            dl.setAttribute("download", "sportpulse_3d_match_report.json");
+            document.body.appendChild(dl);
+            dl.click();
+            dl.remove();
+            showNotification("📥 تم تصدير تقرير الأداء التكتيكي الثلاثي الأبعاد بنجاح.");
+        }
+    </script>
+</body>
+</html>
